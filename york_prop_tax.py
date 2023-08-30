@@ -28,7 +28,6 @@ if __name__ == "__main__":
 
     try:
         tb_url = get_tax_bill_pdf()
-        #print(f"desired_pdf: {tb_url}")
 
         pages = None
         with urllib.request.urlopen(tb_url) as pdf_file:

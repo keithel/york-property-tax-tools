@@ -1,12 +1,3 @@
-# import requests
-# from bs4 import BeautifulSoup
-
-# url = 'https://www.yorkmaine.org/DocumentCenter'
-# response = requests.get(url)
-
-# soup = BeautifulSoup(response.text, 'html.parser')
-# print(soup.title)
-
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
@@ -24,26 +15,6 @@ def print_debug(str):
     if DEBUG:
         print(str)
 
-def test_eight_components():
-    driver = webdriver.Chrome()
-    driver.get("https://www.selenium.dev/selenium/web/web-form.html")
-    title = driver.title
-    assert title == "Web form"
-
-    driver.implicitly_wait(0.5)
-
-    text_box = driver.find_element(by = By.NAME, value = "my-text")
-    submit_button = driver.find_element(by = By.CSS_SELECTOR, value = "button")
-
-    text_box.send_keys("Selenium")
-    submit_button.click()
-
-    message = driver.find_element(by = By.ID, value = "message")
-    value = message.text
-    assert value == "Received!"
-
-    driver.quit()
-
 def get_tax_bill_pdf():
     driver = webdriver.Chrome()
     driver.get("https://www.yorkmaine.org/DocumentCenter")
@@ -54,12 +25,13 @@ def get_tax_bill_pdf():
     print_debug(f"len(tax_collector_spans) == {len(tax_collector_spans)}")
     assert len(tax_collector_spans) == 1
     tax_collector_span = tax_collector_spans[0]
-    # tax_collector_span.click()
 
     parent_t_item = tax_collector_span.find_element(by = By.XPATH, value = "../..")
     print_debug(f"parent_t_item.tag_name == {parent_t_item.tag_name}")
     assert parent_t_item.tag_name == "li"
     parent_t_item.click()
+    # It would be better if this did not rely on timer based waits to function,
+    # as it can be unreliable.
     time.sleep(0.2)
 
     t_in_spans = parent_t_item.find_elements(by = By.CSS_SELECTOR, value = "span.t-in")
@@ -71,7 +43,6 @@ def get_tax_bill_pdf():
     assert len(tax_bills_spans) == 1
 
     tax_bills_span = tax_bills_spans[0]
-    # tax_bills_span.click()
     tax_bills_item = tax_bills_span.find_element(by = By.XPATH, value = "../..")
     tax_bills_item.click()
 
