@@ -1,0 +1,2 @@
+selenium>=4.11
+pypdf>= 3.15
