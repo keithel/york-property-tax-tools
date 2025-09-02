@@ -25,25 +25,18 @@ def process_pdf(pdf_io, search_query, output):
             sys.stdout.buffer.write(pdf_io.read())
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command", metavar="COMMAND", type=str, default="url",
-        nargs="?",
-        help="A command, one of 'url' or 'get'. If unspecified, 'url' is "
-        "implied.\r"
-        "    url - Print the URL to the current tax year's taxes.\r"
-        "    get - Fetch and output all property taxes for the year given (or "
-        "          current year if not specified). If no name or address "
-        "          specified, will output all property tax bills.")
+    parser = argparse.ArgumentParser(
+        description="Fetch Town of York Maine real estate tax pdf for a given last name, or all pages."
+    )
     parser.add_argument("-s", "--search", metavar="SEARCH_QUERY", type=str,
         default=None,
-        help="A search query used to find the desired property tax bill page.")
+        help="A last name search query used to find the desired property tax bill page.")
     parser.add_argument("-o", "--output", metavar="output-path", type=Path,
         default=None, help="Output PDF file.")
     parser.add_argument("--search-pdf", metavar="PDF_FILE", type=str,
         default=None,
         help="Provide an already downloaded PDF of all tax bills")
     args = parser.parse_args()
-    cmd = args.command
     search_query = args.search.lower() if args.search else None
 
     try:
