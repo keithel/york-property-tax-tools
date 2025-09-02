@@ -20,7 +20,11 @@ def bill_last_name(pdf_page: PageObject) -> str: # pylint: disable=redefined-out
     # like so: 'acreagealdrich paul j/sally a' or 'acreagekyzivat mary k hrs of'
     # The [7:] is to strip off 'acreage'.
     # The remainder is to just return the last name.
-    return pdf_page.extract_text().splitlines()[4][7:].split(' ')[0].lower()
+    lines = pdf_page.extract_text().splitlines()
+    last_name = lines[4][7:].split(' ')[0]
+    if len(last_name) == 0:
+        last_name = lines[5].split(" ")[0]
+    return last_name.lower()
 
 def find_page(pdf_io: IO, query: str) -> Optional[PageObject]: # pylint: disable=redefined-outer-name
     """
@@ -48,7 +52,7 @@ def find_page(pdf_io: IO, query: str) -> Optional[PageObject]: # pylint: disable
         cur_mid = round((cur_end-cur_begin) / 2) + cur_begin
         cur_last_name = bill_last_name(pdf.pages[cur_mid])
 
-    if cur_begin == cur_end:
+    if not query in cur_last_name and cur_begin == cur_end:
         return None
 
     return pdf.pages[cur_mid]
