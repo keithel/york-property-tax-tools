@@ -53,9 +53,9 @@ def find_page(pdf_io: IO, query: str) -> Optional[PageObject]: # pylint: disable
         cur_last_name = bill_last_name(pdf.pages[cur_mid])
 
     if not query in cur_last_name and cur_begin == cur_end:
-        return None
+        return (None, None)
 
-    return pdf.pages[cur_mid]
+    return (cur_last_name, pdf.pages[cur_mid])
 
 
 if __name__ == "__main__":
@@ -78,7 +78,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     with open(pdf_path, "rb") as pdf_file:
-        pdf_page = find_page(pdf_file, search_query)
+        (last_name, pdf_page) = find_page(pdf_file, search_query)
         if not pdf_page:
             print(f"No page found that matches '{search_query}'", file=sys.stderr)
             sys.exit(1)
@@ -92,5 +92,6 @@ if __name__ == "__main__":
                 writer.close()
                 print(f"Success, wrote matching tax bill PDF to {args.output}")
         else:
+            print(f"Last name: {last_name}")
             print(f"Matched page split lines: {pdf_page.extract_text().splitlines()}")
             print("To save the matched page to a new PDF file, pass --output=<path to output PDF>")

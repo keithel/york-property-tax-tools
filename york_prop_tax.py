@@ -5,18 +5,29 @@ from find_york_tax_pdf_page import find_page
 from pypdf import PdfWriter
 import urllib
 import sys
+import io
 
 def process_pdf(pdf_io, search_query, output):
     if search_query:
-        found_page = find_page(pdf_io, search_query)
+        (last_name, found_page) = find_page(pdf_io, search_query)
+        if not output:
+            output = f"./{last_name}.pdf"
         if found_page:
             writer = PdfWriter()
             writer.add_page(found_page)
             if output:
-                with open(output, "wb") as outfile:
-                    writer.write(outfile)
+                if str(output) == "-":
+                    buf_io = io.BytesIO()
+                    writer.write(buf_io)
+                    sys.stdout.buffer.write(buf_io.getvalue())
+                    writer.close()
+                    buf_io.close()
+                else:
+                    with open(output, "wb") as outfile:
+                        writer.write(outfile)
+                        print(f"Wrote {output}")
         else:
-            print(f"No page found for query '{search_query}'", file=sys.stderr)
+            raise BillNotFoundException(f"No page found for query '{search_query}'")
     else:
         if output:
             with open(output, "wb") as outfile:
@@ -30,7 +41,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("-s", "--search", metavar="SEARCH_QUERY", type=str,
         default=None,
-        help="A last name search query used to find the desired property tax bill page.")
+        help="A last name search query used to find the desired property tax bill page."
+             " Defaults to <lastname>.pdf. Pass '-' for stdout")
     parser.add_argument("-o", "--output", metavar="output-path", type=Path,
         default=None, help="Output PDF file.")
     parser.add_argument("--search-pdf", metavar="PDF_FILE", type=str,
