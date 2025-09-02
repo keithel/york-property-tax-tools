@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 import sys
 from typing import IO, Optional, Union, BinaryIO
-from io import BufferedWriter
+from io import BufferedWriter, BytesIO
 from pypdf import PdfReader, PageObject, PdfWriter
 
 
@@ -22,10 +22,17 @@ def bill_last_name(pdf_page: PageObject) -> str: # pylint: disable=redefined-out
     # The remainder is to just return the last name.
     return pdf_page.extract_text().splitlines()[4][7:].split(' ')[0].lower()
 
-def find_page(pdf_file: IO, query: str) -> Optional[PageObject]: # pylint: disable=redefined-outer-name
+def find_page(pdf_io: IO, query: str) -> Optional[PageObject]: # pylint: disable=redefined-outer-name
     """
     Finds the Town of York, Maine real estate tax bill PDF page, and returns it.
     """
+    pdf_file = pdf_io
+    if not pdf_io.seekable():
+        # Read the entire pdf - this can be big - Usually around 50-60MB.
+        # Reasoning: PdfReader cannot seek an urllib stream.
+        pdf_bytes = pdf_io.read()
+        pdf_file = BytesIO(pdf_bytes)
+
     pdf = PdfReader(pdf_file)
     num_pages = len(pdf.pages)
     cur_begin = 0
